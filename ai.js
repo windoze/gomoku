@@ -38,6 +38,25 @@ class GomokuAI {
             return { row: center, col: center };
         }
 
+        // AI的第一步（回应玩家的第一步）时，随机选择玩家棋子周围的位置
+        if (game.history.length === 1) {
+            const playerMove = game.history[0];
+            const offsets = [
+                [-1, -1], [-1, 0], [-1, 1],
+                [0, -1],           [0, 1],
+                [1, -1],  [1, 0],  [1, 1]
+            ];
+            // 过滤出有效位置
+            const validMoves = offsets
+                .map(([dr, dc]) => ({ row: playerMove.row + dr, col: playerMove.col + dc }))
+                .filter(pos => game.isValidMove(pos.row, pos.col));
+
+            if (validMoves.length > 0) {
+                // 随机选择一个位置
+                return validMoves[Math.floor(Math.random() * validMoves.length)];
+            }
+        }
+
         const candidates = this.getCandidateMoves(game);
 
         if (candidates.length === 0) {

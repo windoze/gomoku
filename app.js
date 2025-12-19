@@ -24,9 +24,51 @@ class GomokuApp {
 
     init() {
         this.setupCanvas();
+        this.loadSettings();
         this.bindEvents();
         this.createBoardCache();
         this.draw();
+    }
+
+    /**
+     * 从localStorage加载设置
+     */
+    loadSettings() {
+        try {
+            const saved = localStorage.getItem('gomoku_settings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+
+                // 恢复AI难度
+                if (settings.aiDifficulty) {
+                    this.ai.setDepth(settings.aiDifficulty);
+                    document.getElementById('aiDifficulty').value = settings.aiDifficulty;
+                }
+
+                // 恢复玩家颜色
+                if (settings.playerColor) {
+                    this.playerColor = settings.playerColor;
+                    document.getElementById('playerColor').value = settings.playerColor;
+                }
+            }
+        } catch (e) {
+            console.log('Failed to load settings:', e);
+        }
+    }
+
+    /**
+     * 保存设置到localStorage
+     */
+    saveSettings() {
+        try {
+            const settings = {
+                aiDifficulty: parseInt(document.getElementById('aiDifficulty').value),
+                playerColor: this.playerColor
+            };
+            localStorage.setItem('gomoku_settings', JSON.stringify(settings));
+        } catch (e) {
+            console.log('Failed to save settings:', e);
+        }
     }
 
     /**
@@ -104,10 +146,12 @@ class GomokuApp {
         // AI设置
         document.getElementById('aiDifficulty').addEventListener('change', (e) => {
             this.ai.setDepth(parseInt(e.target.value));
+            this.saveSettings();
         });
 
         document.getElementById('playerColor').addEventListener('change', (e) => {
             this.playerColor = e.target.value;
+            this.saveSettings();
             this.restartGame();
         });
 
